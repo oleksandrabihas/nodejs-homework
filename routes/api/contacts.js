@@ -6,7 +6,6 @@ const schema = require("../../schemas/ValidateSchemasContacts");
 const ValidateBodyContact = require("../../middlewares/ValidateBodyAddContact");
 const paginationSchema = require("../../schemas/ValidatePagination");
 const authenticate = require("../../middlewares/authenticate");
-// const filterQuerySchema = require("../../schemas/filterQuery");
 
 router.get(
   "/",
