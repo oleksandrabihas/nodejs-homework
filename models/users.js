@@ -1,12 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const gravatar = require("gravatar");
-const path = require("path");
-const fs = require("fs/promises");
 const HttpError = require("../helpers/HttpError");
 const { User } = require("../schemas/ValidateAuth");
 const { SECRET_KEY } = require("../constants/env");
-const resizeImagesJimp = require("../helpers/resizeImagesJimp");
 
 const ifIsResult = (result) => {
   if (!result) {
@@ -15,13 +11,11 @@ const ifIsResult = (result) => {
 };
 
 const registerUserInDB = async (body) => {
-  const { password, email } = body;
-  const avatarUrl = gravatar.url(email);
+  const { password } = body;
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = await User.create({
     ...body,
     password: hashedPassword,
-    avatarUrl,
   });
   ifIsResult(newUser);
   return newUser;
@@ -51,30 +45,12 @@ const logoutFromDB = async (user) => {
   return result;
 };
 
-const updateUserSubscriptionInDB = async ({ user: { _id }, params: { userId }, body: { subscription } }) => {
+const updateUserSubscriptionInDB = async ({_id}, userId, subscription) => {
   if (_id.toString() !== userId) {
-    throw HttpError(403);
+    throw HttpError(403)
   }
-  const result = await User.findByIdAndUpdate(
-    _id,
-    { subscription },
-    { new: true }
-  );
+  const result = await User.findByIdAndUpdate(_id, { subscription }, {new: true});
   return result;
-};
-
-const uploadUserAvatarInDB = async (req) => {
-  const { _id } = req.user;
-  const { path: tempUpload, originalname } = req.file;
-  const avatarDir = path.join(__dirname, "../", "public", "avatars");
-  const filename = `${_id}_${originalname}`;
-  const resultUpload = path.join(avatarDir, filename);
-  await fs.rename(tempUpload, resultUpload);
-  await resizeImagesJimp(resultUpload, 250);
-
-  const avatarUrl = path.join("avatars", filename);
-await User.findByIdAndUpdate(_id, { avatarUrl }, {new: true});
-  return avatarUrl;
 };
 
 module.exports = {
@@ -82,5 +58,4 @@ module.exports = {
   loginUserInDB,
   logoutFromDB,
   updateUserSubscriptionInDB,
-  uploadUserAvatarInDB,
 };

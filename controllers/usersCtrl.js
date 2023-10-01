@@ -4,7 +4,6 @@ const {
   loginUserInDB,
   logoutFromDB,
   updateUserSubscriptionInDB,
-  uploadUserAvatarInDB,
 } = require("../models/users");
 
 const registerUser = async (req, res, next) => {
@@ -50,21 +49,15 @@ const logout = async (req, res, next) => {
 };
 
 const updateUserSubscription = async (req, res, next) => {
-  console.log("it is patch favorite");
   try {
-    // const { subscription } = req.body;
-    // const { userId } = req.params;
-    const result = await updateUserSubscriptionInDB(req);
+    const { subscription } = req.body;
+    const { userId } = req.params;
+    const result = await updateUserSubscriptionInDB(
+      req.user,
+      userId,
+      subscription
+    );
     res.status(200).json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-const uploadUserAvatar = async (req, res, next) => {
-  try {
-    const avatarUrl = await uploadUserAvatarInDB(req);
-    res.status(200).json({ avatarUrl });
   } catch (error) {
     next(error);
   }
@@ -76,5 +69,4 @@ module.exports = {
   getCurrent,
   logout,
   updateUserSubscription,
-  uploadUserAvatar,
 };
