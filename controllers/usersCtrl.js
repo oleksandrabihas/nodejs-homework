@@ -52,8 +52,6 @@ const logout = async (req, res, next) => {
 const updateUserSubscription = async (req, res, next) => {
   console.log("it is patch favorite");
   try {
-    // const { subscription } = req.body;
-    // const { userId } = req.params;
     const result = await updateUserSubscriptionInDB(req);
     res.status(200).json(result);
   } catch (error) {

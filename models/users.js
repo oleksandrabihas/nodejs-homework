@@ -70,6 +70,7 @@ const uploadUserAvatarInDB = async (req) => {
   const filename = `${_id}_${originalname}`;
   const resultUpload = path.join(avatarDir, filename);
   await fs.rename(tempUpload, resultUpload);
+  
   await resizeImagesJimp(resultUpload, 250);
 
   const avatarUrl = path.join("avatars", filename);
