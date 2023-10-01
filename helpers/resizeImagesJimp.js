@@ -1,6 +1,5 @@
 const jimp = require("jimp");
 
-
 const resizeImagesJimp = async (file, size) => {
   const image = await jimp.read(file);
   const width = image.getWidth();

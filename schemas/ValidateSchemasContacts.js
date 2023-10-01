@@ -45,8 +45,6 @@ const validateUpdateContactSchema = Joi.object({
   favorite: Joi.bool(),
 });
 
-
-
 module.exports = {
   Contact,
   validateAddContactSchema,
