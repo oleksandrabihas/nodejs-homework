@@ -18,11 +18,7 @@ const userSchema = new Schema(
       enum: subscriptionList,
       default: "starter",
     },
-    token: { type: String },
-    avatarUrl: {
-      type: String,
-      required: true,
-    },
+    token: String,
   },
   { versionKey: false, timestamps: true }
 );
@@ -38,22 +34,11 @@ const validateUserSchemaRegister = Joi.object({
 const validateUserSchemaLogin = Joi.object({
   password: Joi.string().min(1).max(30).required(),
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
-});
-
-const validateUpdateSubscription = Joi.object({
-  subscription: Joi.string()
-    .valid(...subscriptionList)
-    .required(),
-});
-
-const validateUploadAvatar = Joi.object({
-  avatarUrl: Joi.string(),
+  
 });
 
 module.exports = {
   User,
   validateUserSchemaRegister,
   validateUserSchemaLogin,
-  validateUpdateSubscription,
-  validateUploadAvatar,
 };
