@@ -51,11 +51,7 @@ const logoutFromDB = async (user) => {
   return result;
 };
 
-const updateUserSubscriptionInDB = async ({
-  user: { _id },
-  params: { userId },
-  body: { subscription },
-}) => {
+const updateUserSubscriptionInDB = async ({ user: { _id }, params: { userId }, body: { subscription } }) => {
   if (_id.toString() !== userId) {
     throw HttpError(403);
   }
@@ -74,10 +70,11 @@ const uploadUserAvatarInDB = async (req) => {
   const filename = `${_id}_${originalname}`;
   const resultUpload = path.join(avatarDir, filename);
   await fs.rename(tempUpload, resultUpload);
+  
   await resizeImagesJimp(resultUpload, 250);
 
   const avatarUrl = path.join("avatars", filename);
-  await User.findByIdAndUpdate(_id, { avatarUrl }, { new: true });
+await User.findByIdAndUpdate(_id, { avatarUrl }, {new: true});
   return avatarUrl;
 };
 
