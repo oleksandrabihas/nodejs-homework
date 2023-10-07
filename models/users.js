@@ -3,16 +3,20 @@ const jwt = require("jsonwebtoken");
 const gravatar = require("gravatar");
 const path = require("path");
 const fs = require("fs/promises");
+const { nanoid } = require("nanoid");
 const HttpError = require("../helpers/HttpError");
 const { User } = require("../schemas/ValidateAuth");
-const { SECRET_KEY } = require("../constants/env");
+const { SECRET_KEY, BASE_URL } = require("../constants/env");
 const resizeImagesJimp = require("../helpers/resizeImagesJimp");
+const sendEmail = require("../helpers/hodemailer");
 
 const ifIsResult = (result) => {
   if (!result) {
     throw HttpError(404);
   }
 };
+
+const verificationToken = nanoid();
 
 const registerUserInDB = async (body) => {
   const { password, email } = body;
@@ -22,13 +26,24 @@ const registerUserInDB = async (body) => {
     ...body,
     password: hashedPassword,
     avatarUrl,
+    verificationToken,
   });
+
+  await sendEmail({
+    to: "sashka.bigas@gmail.com",
+    subject: "Verify your email",
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click here to verify you email</a>`,
+  });
+
   ifIsResult(newUser);
   return newUser;
 };
 
 const loginUserInDB = async (body) => {
-  const { email, password } = body;
+  const { email, password, verify, verificationToken } = body;
+  if (verify !== true && verificationToken !== null) {
+    throw HttpError(403, "You must verify your email.");
+  }
   const user = await User.findOne({ email });
   if (!user) {
     throw HttpError(401, "Email or password invalid");
@@ -51,7 +66,11 @@ const logoutFromDB = async (user) => {
   return result;
 };
 
-const updateUserSubscriptionInDB = async ({ user: { _id }, params: { userId }, body: { subscription } }) => {
+const updateUserSubscriptionInDB = async ({
+  user: { _id },
+  params: { userId },
+  body: { subscription },
+}) => {
   if (_id.toString() !== userId) {
     throw HttpError(403);
   }
@@ -70,12 +89,24 @@ const uploadUserAvatarInDB = async (req) => {
   const filename = `${_id}_${originalname}`;
   const resultUpload = path.join(avatarDir, filename);
   await fs.rename(tempUpload, resultUpload);
-  
+
   await resizeImagesJimp(resultUpload, 250);
 
   const avatarUrl = path.join("avatars", filename);
-await User.findByIdAndUpdate(_id, { avatarUrl }, {new: true});
+  await User.findByIdAndUpdate(_id, { avatarUrl }, { new: true });
   return avatarUrl;
+};
+
+const verifyUserInDB = async (verificationToken) => {
+  const ifIsUser = await User.findOne({ verificationToken });
+  if (!ifIsUser) {
+    throw HttpError(404);
+  }
+  await User.findOneAndUpdate(
+    { verificationToken },
+    { verificationToken: null, verify: true },
+    { new: true }
+  );
 };
 
 module.exports = {
@@ -84,4 +115,5 @@ module.exports = {
   logoutFromDB,
   updateUserSubscriptionInDB,
   uploadUserAvatarInDB,
+  verifyUserInDB,
 };

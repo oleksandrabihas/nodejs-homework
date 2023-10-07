@@ -5,6 +5,7 @@ const {
   logoutFromDB,
   updateUserSubscriptionInDB,
   uploadUserAvatarInDB,
+  verifyUserInDB,
 } = require("../models/users");
 
 const registerUser = async (req, res, next) => {
@@ -68,6 +69,18 @@ const uploadUserAvatar = async (req, res, next) => {
   }
 };
 
+const verifyEmail = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    await verifyUserInDB(verificationToken);
+    res.status(200).json({
+      message: "Verification successful",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -75,4 +88,5 @@ module.exports = {
   logout,
   updateUserSubscription,
   uploadUserAvatar,
+  verifyEmail,
 };
