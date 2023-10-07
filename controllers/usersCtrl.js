@@ -6,6 +6,7 @@ const {
   updateUserSubscriptionInDB,
   uploadUserAvatarInDB,
   verifyUserInDB,
+  resendingVerifyEmail,
 } = require("../models/users");
 
 const registerUser = async (req, res, next) => {
@@ -18,6 +19,17 @@ const registerUser = async (req, res, next) => {
     if (error.code === 11000 && error.keyPattern.email) {
       next(HttpError(409, "Email is already taken"));
     }
+    next(error);
+  }
+};
+
+const verifyEmail = async (req, res, next) => {
+  try {
+    await verifyUserInDB(req.params);
+    res.status(200).json({
+      message: "Verification successful",
+    });
+  } catch (error) {
     next(error);
   }
 };
@@ -69,12 +81,12 @@ const uploadUserAvatar = async (req, res, next) => {
   }
 };
 
-const verifyEmail = async (req, res, next) => {
+const resendVerifyEmail = async (req, res, next) => {
   try {
-    const { verificationToken } = req.params;
-    await verifyUserInDB(verificationToken);
+    const { email } = req.body;
+    await resendingVerifyEmail(email);
     res.status(200).json({
-      message: "Verification successful",
+      message: "Verification email sent",
     });
   } catch (error) {
     next(error);
@@ -83,10 +95,11 @@ const verifyEmail = async (req, res, next) => {
 
 module.exports = {
   registerUser,
+  verifyEmail,
   loginUser,
   getCurrent,
   logout,
   updateUserSubscription,
   uploadUserAvatar,
-  verifyEmail,
+  resendVerifyEmail,
 };

@@ -7,6 +7,7 @@ const {
   validateUserSchemaLogin,
   validateUpdateSubscription,
   validateUploadAvatar,
+  validateEmail,
 } = require("../../schemas/ValidateAuth");
 const ctrl = require("../../controllers/usersCtrl");
 const authenticate = require("../../middlewares/authenticate");
@@ -17,6 +18,7 @@ router.post(
   Validate(validateUserSchemaRegister),
   ctrl.registerUser
 );
+router.get("/verify/:verificationToken", ctrl.verifyEmail);
 
 router.post("/login", Validate(validateUserSchemaLogin), ctrl.loginUser);
 
@@ -39,7 +41,8 @@ router.patch(
   ctrl.updateUserSubscription
 );
 
-router.get("/verify/:verificationToken", ctrl.verifyEmail);
+router.post("/verify", Validate(validateEmail),
+ctrl.resendVerifyEmail)
 
 
 module.exports = router;

@@ -58,10 +58,15 @@ const validateUploadAvatar = Joi.object({
   avatarUrl: Joi.string(),
 });
 
+const validateEmail = Joi.object({
+  email: Joi.string().email({ minDomainSegments: 2 }).required(),
+});
+
 module.exports = {
   User,
   validateUserSchemaRegister,
   validateUserSchemaLogin,
   validateUpdateSubscription,
   validateUploadAvatar,
+  validateEmail,
 };

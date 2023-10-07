@@ -30,13 +30,24 @@ const registerUserInDB = async (body) => {
   });
 
   await sendEmail({
-    to: "sashka.bigas@gmail.com",
+    to: email,
     subject: "Verify your email",
-    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click here to verify you email</a>`,
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click here to verify your email</a>`,
   });
 
   ifIsResult(newUser);
   return newUser;
+};
+
+const verifyUserInDB = async ({ verificationToken }) => {
+  const ifIsUser = await User.findOne({ verificationToken });
+  if (!ifIsUser) {
+    throw HttpError(404, "User not found");
+  }
+  await User.findOneAndUpdate(
+    { verificationToken },
+    { verificationToken: null, verify: true }
+  );
 };
 
 const loginUserInDB = async (body) => {
@@ -97,23 +108,27 @@ const uploadUserAvatarInDB = async (req) => {
   return avatarUrl;
 };
 
-const verifyUserInDB = async (verificationToken) => {
-  const ifIsUser = await User.findOne({ verificationToken });
-  if (!ifIsUser) {
-    throw HttpError(404);
+const resendingVerifyEmail = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw HttpError(404, "User not found");
   }
-  await User.findOneAndUpdate(
-    { verificationToken },
-    { verificationToken: null, verify: true },
-    { new: true }
-  );
+  if (user.verify === true) {
+    throw HttpError(400, "Verification has already been passed");
+  }
+  await sendEmail({
+    to: email,
+    subject: "Verify your email",
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click here to verify your email</a>`,
+  });
 };
 
 module.exports = {
   registerUserInDB,
+  verifyUserInDB,
   loginUserInDB,
   logoutFromDB,
   updateUserSubscriptionInDB,
   uploadUserAvatarInDB,
-  verifyUserInDB,
+  resendingVerifyEmail,
 };
