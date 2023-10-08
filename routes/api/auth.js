@@ -41,8 +41,6 @@ router.patch(
   ctrl.updateUserSubscription
 );
 
-router.post("/verify", Validate(validateEmail),
-ctrl.resendVerifyEmail)
-
+router.post("/verify", Validate(validateEmail), ctrl.resendVerifyEmail);
 
 module.exports = router;

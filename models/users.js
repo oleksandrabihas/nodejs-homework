@@ -26,7 +26,7 @@ const registerUserInDB = async (body) => {
     ...body,
     password: hashedPassword,
     avatarUrl,
-    verificationToken,
+    verificationToken
   });
 
   await sendEmail({
@@ -109,6 +109,7 @@ const uploadUserAvatarInDB = async (req) => {
 };
 
 const resendingVerifyEmail = async (email) => {
+  console.log(email)
   const user = await User.findOne({ email });
   if (!user) {
     throw HttpError(404, "User not found");
@@ -119,7 +120,7 @@ const resendingVerifyEmail = async (email) => {
   await sendEmail({
     to: email,
     subject: "Verify your email",
-    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click here to verify your email</a>`,
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verificationToken}">Click here to verify your email</a>`,
   });
 };
 

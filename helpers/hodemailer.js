@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const { PASSWORD_MAIL, USERNAME_MAIL } = require("../constants/env");
 
 const config = {
-  host: "smtp.meta.ua",
+  host: "smtp.ukr.net",
   port: 465,
   secure: true,
   auth: {
@@ -20,10 +20,11 @@ const sendEmail = async (payload) => {
       from: USERNAME_MAIL,
     };
     const res = await transporter.sendMail(email);
-      return res
-    } catch (error) {
-      console.log("here is error", error)  
-    }
-}
+    return res;
+  } catch (error) {
+    console.log("Error in sending",error.message);
+    throw new Error(error.message);
+  }
+};
 
-module.exports = sendEmail
+module.exports = sendEmail;
